@@ -113,6 +113,7 @@ ctx = nullcontext() if device_type == 'cpu' else torch.amp.autocast(device_type=
 
 # poor man's data loader
 data_dir = os.path.join('data', dataset)
+print(f"Dataset directory: {data_dir}")
 train_data = np.memmap(os.path.join(data_dir, 'train.bin'), dtype=np.uint16, mode='r')
 val_data = np.memmap(os.path.join(data_dir, 'val.bin'), dtype=np.uint16, mode='r')
 def get_batch(split):
@@ -249,6 +250,7 @@ t0 = time.time()
 local_iter_num = 0 # number of iterations in the lifetime of this process
 raw_model = model.module if ddp else model # unwrap DDP container if needed
 running_mfu = -1.0
+start_time = time.perf_counter()
 while True:
 
     # determine and set the learning rate for this iteration
@@ -328,6 +330,7 @@ while True:
     # termination conditions
     if iter_num > max_iters:
         break
-
+end_time = time.perf_counter()
+print(f"time elapsed: {end_time - start_time}s")
 if ddp:
     destroy_process_group()
